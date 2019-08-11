@@ -1,23 +1,23 @@
-// import { Fulfillment } from './sell/fulfillment';
+import { Fulfillment } from './sell/fulfillment';
 import axios from 'axios';
 // import axios = require('axios');
 // import base64js = require("base64-js");
 import base64 = require('base-64');
-import encodeUrl = require('encodeurl');
+// import encodeUrl = require('encodeurl');
+const { encode } = require('url-encode-decode');
 
 // ('use strict');
 
-class EbayAPI {
+export class EbayAPI {
   protected redirectURI = '';
   protected scope = '';
   protected accessToken = '';
   protected refreshToken = '';
 
-  // public fulfillment: Fulfillment;
+  public fulfillment: Fulfillment;
 
   constructor(public clientID: string, public clientSecret: string) {
-    // this.fulfillment = new Fulfillment(clientID, clientSecret);
-
+    this.fulfillment = new Fulfillment(clientID, clientSecret);
     // this.clientID = clientID;
     // this.clientSecret = clientSecret;
   }
@@ -47,7 +47,7 @@ class EbayAPI {
           },
         },
       )
-      .then(function(this: EbayAPI, response: any) {
+      .then((response: any) => {
         console.log('response ', response);
 
         //TODO:Save values
@@ -61,7 +61,9 @@ class EbayAPI {
       });
   }
 
-  renewAccessToken() {
+  renewAccessToken(refreshToken: string) {
+    this.refreshToken = refreshToken;
+
     axios
       .post(
         'https://api.ebay.com/identity/v1/oauth2/token',
@@ -69,7 +71,7 @@ class EbayAPI {
         {
           params: {
             grant_type: 'refresh_token',
-            refresh_token: encodeUrl(this.refreshToken), //TODO: Add url encoding
+            refresh_token: this.refreshToken, //TODO: Add url encoding
           },
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -77,11 +79,11 @@ class EbayAPI {
           },
         },
       )
-      .then(function(this:EbayAPI, response: any) {
+      .then((response: any) => {
         console.log('response ', response);
 
         //TODO:Save values
-        this.accessToken = response.access_token;
+        this.accessToken = response.data.access_token;
         console.log('TCL: EbayAPI -> renewAccessToken -> this.accessToken', this.accessToken);
       })
       .catch(function(error) {
@@ -89,10 +91,9 @@ class EbayAPI {
       });
   }
 
+
   // get fulfillment() {
   //   this.fulfillment.setAccessToken(this.accessToken);
   //   return this.fulfillment;
   // }
 }
-
-// module.exports = EbayAPI;
