@@ -1,12 +1,8 @@
 import { Fulfillment } from './sell/fulfillment';
 import axios from 'axios';
-// import axios = require('axios');
-// import base64js = require("base64-js");
 import base64 = require('base-64');
-// import encodeUrl = require('encodeurl');
 const { encode } = require('url-encode-decode');
 
-// ('use strict');
 
 export class EbayAPI {
   protected redirectURI = '';
@@ -18,15 +14,12 @@ export class EbayAPI {
 
   constructor(public clientID: string, public clientSecret: string) {
     this.fulfillment = new Fulfillment(clientID, clientSecret);
-    // this.clientID = clientID;
-    // this.clientSecret = clientSecret;
   }
 
   generateAccessToken(code: string, redirectURI: string, scope: string) {
     this.redirectURI = redirectURI;
     this.scope = scope;
 
-    //TODO:API Call
     console.log('clientID ', this.clientID);
     console.log('clientSecret ', this.clientSecret);
     console.log('base64 encoded auth ' + base64.encode(this.clientID + ':' + this.clientSecret));
@@ -50,7 +43,7 @@ export class EbayAPI {
       .then((response: any) => {
         console.log('response ', response);
 
-        //TODO:Save values
+        //Save values
         this.accessToken = response.accessToken;
         console.log('TCL: EbayAPI -> generateAccessToken -> this.accessToken', this.accessToken);
         this.refreshToken = response.refresh_token;
@@ -61,17 +54,17 @@ export class EbayAPI {
       });
   }
 
-  renewAccessToken(refreshToken: string) {
+  renewAccessToken(refreshToken: string): Promise<string> {
     this.refreshToken = refreshToken;
 
-    axios
+    return axios
       .post(
         'https://api.ebay.com/identity/v1/oauth2/token',
         {},
         {
           params: {
             grant_type: 'refresh_token',
-            refresh_token: this.refreshToken, //TODO: Add url encoding
+            refresh_token: this.refreshToken,
           },
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -82,18 +75,38 @@ export class EbayAPI {
       .then((response: any) => {
         console.log('response ', response);
 
-        //TODO:Save values
+        //Save values
         this.accessToken = response.data.access_token;
         console.log('TCL: EbayAPI -> renewAccessToken -> this.accessToken', this.accessToken);
+        return this.accessToken;
       })
-      .catch(function(error) {
+      .catch(function(this: any, error) {
         console.log('error ', error);
+        return this.accessToken;
+
       });
   }
 
+  async validAccessToken(accessToken: string): Promise<boolean> {
+    this.accessToken = accessToken;
+    return await axios
+      .get(`https://api.ebay.com/sell/fulfillment/v1/order?limit=1`, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: 'Bearer ' + this.accessToken,
+        },
+      })
+      .then(response => {
+        return true;
+      })
+      .catch(error => {
+        // console.log('TCL: error', error);
+        return false;
+      });
+  }
 
-  // get fulfillment() {
-  //   this.fulfillment.setAccessToken(this.accessToken);
-  //   return this.fulfillment;
-  // }
+  getAccessToken(): string {
+    return this.accessToken;
+  }
+
 }
