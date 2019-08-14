@@ -3,6 +3,7 @@ import axios from 'axios';
 import base64 = require('base-64');
 const { encode } = require('url-encode-decode');
 
+// Temp comment
 
 export class EbayAPI {
   protected redirectURI = '';
@@ -83,7 +84,6 @@ export class EbayAPI {
       .catch(function(this: any, error) {
         console.log('error ', error);
         return this.accessToken;
-
       });
   }
 
@@ -108,5 +108,4 @@ export class EbayAPI {
   getAccessToken(): string {
     return this.accessToken;
   }
-
 }
