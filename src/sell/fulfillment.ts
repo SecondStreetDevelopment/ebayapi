@@ -34,10 +34,14 @@ export class Fulfillment {
       });
   }
 
-  getOrders(accessToken: string, filter?: string, limit: string = '200', offset: string = '0'): any {
+  getOrders(accessToken: string, createdAfter?: string, limit: string = '200', offset: string = '0'): any {
     this.accessToken = accessToken;
+    let url = `https://api.ebay.com/sell/fulfillment/v1/order?limit=${limit}&offset=${offset}`;
+    if (createdAfter) {
+      url += `&filter=creationdate:[${createdAfter}..]`;
+    }
     return axios
-      .get(`https://api.ebay.com/sell/fulfillment/v1/order?limit=${limit}&offset=${offset}`, {
+      .get(url, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: 'Bearer ' + this.accessToken,
