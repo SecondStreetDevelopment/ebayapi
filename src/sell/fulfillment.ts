@@ -37,8 +37,8 @@ export class Fulfillment {
   getOrders(accessToken: string, createdAfter?: string, limit: string = '200', offset: string = '0'): any {
     this.accessToken = accessToken;
     let url = `https://api.ebay.com/sell/fulfillment/v1/order?limit=${limit}&offset=${offset}`;
-    if (createdAfter) {
-      url += `&filter=creationdate:[${createdAfter}..]`;
+    if (createdAfter != undefined) {
+      url = url + `&filter=creationdate:[${createdAfter}..]`;
     }
     return axios
       .get(url, {
